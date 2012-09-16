@@ -183,7 +183,7 @@ class RequestDetail extends CFormModel
 		    	$reqDet[$c]->StockTime = $reqDet[$c]->currentStock / $reqDet[$c]->estimatedSales; // La estimacion es para el mes siguiente puede variar por temporada
 		    else
 		    	$reqDet[$c]->StockTime = -1;
-		    $reqDet[$c]->price;
+		    $reqDet[$c]->price = $itStat[$c]->item->Price;
 		     
 		    $reqDet[$c]->stockBreaksCount;
 		    $reqDet[$c]->orderTotal; // Media de tendencias.

@@ -94,15 +94,15 @@ class ItemStatistics extends CFormModel
 	    //Calculos de Fechas
 	    $fromDateTime = new DateTime($fromDate);
 	    $toDateTime = new DateTime($toDate);
-	    //$diff = $toDateTime->diff($fromDateTime);
-	   // $months = ($diff->y * 12 ) + $diff->m + 1;
-	    $months = 12; 
+	    $diff = $toDateTime->diff($fromDateTime);
+	    $months = ($diff->y * 12 ) + $diff->m + 1;
+	   // $months = 12; 
 		//error_log('Implementar datetime diff en ItemStatistics model');
 	    $criteria=new CDbCriteria;
 	    $criteria->select="item_id, OperDate, -Qty AS Qty";
 	    $criteria->condition="OperDate >= '".$fromDate."' AND OperDate <= '".$toDate."' AND item_id = '".$itemId."'";
 	    $criteria->order="OperDate";
-		$sales = SalesByDay::model()->findAll($criteria); // Este muchacho viene cargado ! 
+		$sales = SalesByDay::model()->findAll($criteria); // Esta llamada viene cargada ! 
 	    
 	    $totalRows = count($sales);
 	    $periodStart = false;
