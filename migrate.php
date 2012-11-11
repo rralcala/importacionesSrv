@@ -12,7 +12,7 @@ if (mysqli_connect_errno()) {
 }
 $myDestination->query("TRUNCATE TABLE SalesByDay");
 $myDestination->query("TRUNCATE TABLE Transaction");
-$myDestination->query('DELETE FROM Item');
+$myDestination->query("DELETE FROM Item");
 
 $i=0;
 
