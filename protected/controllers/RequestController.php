@@ -208,14 +208,17 @@ class RequestController extends Controller
 	 * Creates a new Request.
 	 **/
 	public function actionJsonCreate() {
-		$params = CJSON::decode($GLOBALS['HTTP_RAW_POST_DATA']);
-		$params['Enabled'] = 'A';
-		$dates = array("Date", "PeriodStart", "PeriodEnd", "SubPeriod");
+		$request = CJSON::decode(file_get_contents("php://input"));
+		$params = $request[0];
+		error_log("AA.".print_r($params, true)); //'Description', 
+		$dates = array(	'Date', 'P1Start', 'P1End', 'P2Start', 'P2End' );
 		//$timeZone = 'America/Asuncion';
 		//date_default_timezone_set($timeZone); 
-		foreach($dates as $d){
-			$params[$d] = date('Y-m-d', strtotime($params[$d]));
-		}
+		$params['Date'] = date('Y-m-d');
+		//foreach($dates as $d){
+		//	$params[$d] = date('Y-m-d', strtotime($params[$d]));
+		//}
+		
 		$model = new Request;
 		$model->attributes = $params;
 		if($model->save())

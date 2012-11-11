@@ -6,15 +6,18 @@
  * The followings are the available columns in table 'Request':
  * @property string $id
  * @property string $Date
- * @property string $PeriodStart
- * @property string $PeriodEnd
- * @property string $SubPeriod
+ * @property string $Description
+ * @property string $P1Start
+ * @property string $P1End
+ * @property string $P2Start
+ * @property string $P2End
  * @property string $Enabled
  */
 class Request extends CActiveRecord
 {
 	/**
 	 * Returns the static model of the specified AR class.
+	 * @param string $className active record class name.
 	 * @return Request the static model class
 	 */
 	public static function model($className=__CLASS__)
@@ -38,15 +41,12 @@ class Request extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('Date, PeriodStart, PeriodEnd, SubPeriod', 'required'),
+			array('Date, Description, P1Start, P1End, P2Start, P2End', 'required'),
+			array('Description', 'length', 'max'=>32),
 			array('Enabled', 'length', 'max'=>1),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, Date, PeriodStart, PeriodEnd, SubPeriod, Enabled', 'safe', 'on'=>'search'),
-			//array('Date', 'date', 'format' => 'yyyy-MM-dd hh:mm:ss'), 
-			//array('PeriodStart', 'date', 'format' => 'yyyy-MM-dd hh:mm:ss'), 
-			//array('PeriodEnd', 'date', 'format' => 'yyyy-MM-dd hh:mm:ss'), 
-			//array('SubPeriod', 'date', 'format' => 'yyyy-MM-dd hh:mm:ss'), 
+			array('id, Date, Description, P1Start, P1End, P2Start, P2End, Enabled', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -69,9 +69,11 @@ class Request extends CActiveRecord
 		return array(
 			'id' => 'ID',
 			'Date' => 'Date',
-			'PeriodStart' => 'Period Start',
-			'PeriodEnd' => 'Period End',
-			'SubPeriod' => 'Sub Period',
+			'Description' => 'Description',
+			'P1Start' => 'P1 Start',
+			'P1End' => 'P1 End',
+			'P2Start' => 'P2 Start',
+			'P2End' => 'P2 End',
 			'Enabled' => 'Enabled',
 		);
 	}
@@ -89,9 +91,11 @@ class Request extends CActiveRecord
 
 		$criteria->compare('id',$this->id,true);
 		$criteria->compare('Date',$this->Date,true);
-		$criteria->compare('PeriodStart',$this->PeriodStart,true);
-		$criteria->compare('PeriodEnd',$this->PeriodEnd,true);
-		$criteria->compare('SubPeriod',$this->SubPeriod,true);
+		$criteria->compare('Description',$this->Description,true);
+		$criteria->compare('P1Start',$this->P1Start,true);
+		$criteria->compare('P1End',$this->P1End,true);
+		$criteria->compare('P2Start',$this->P2Start,true);
+		$criteria->compare('P2End',$this->P2End,true);
 		$criteria->compare('Enabled',$this->Enabled,true);
 
 		return new CActiveDataProvider($this, array(
