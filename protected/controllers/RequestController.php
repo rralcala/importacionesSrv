@@ -207,22 +207,37 @@ class RequestController extends Controller
 	/**
 	 * Creates a new Request.
 	 **/
-	public function actionJsonCreate() {
+	public function actionJsonCreate() 
+	{
+		$retVal = true;
 		$request = CJSON::decode(file_get_contents("php://input"));
 		$params = $request[0];
-		error_log("AA.".print_r($params, true)); //'Description', 
-		$dates = array(	'Date', 'P1Start', 'P1End', 'P2Start', 'P2End' );
-		//$timeZone = 'America/Asuncion';
-		//date_default_timezone_set($timeZone); 
+ 
 		$params['Date'] = date('Y-m-d');
-		//foreach($dates as $d){
-		//	$params[$d] = date('Y-m-d', strtotime($params[$d]));
-		//}
 		
 		$model = new Request;
 		$model->attributes = $params;
 		if($model->save())
-			echo "{success: true, request_id: $model->id}";
+		{
+			foreach($request[1] as $detail)
+			{
+				$modelDetail = new RequestDetailData;
+				$modelDetail['request_id'] = $model->id;
+				$modelDetail['item_id'] = $detail['item_id'];
+				$modelDetail['StockTime'] = $detail['desiredStockTime'];
+				$modelDetail['ShipTime'] = $detail['ShipTime'];
+				$modelDetail['ManualQty'] = $detail['ManualQty'];
+				if(!$modelDetail->save()){
+					$retVal = false;
+				}
+			}
+		}
+		else
+		{
+			$retVal = false;
+		}
+		
+		echo "{success: ".($retVal?'true':'false').", request_id: ".$model->id."}";
 	}
 	
 	/**
