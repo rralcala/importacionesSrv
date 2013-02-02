@@ -1,46 +1,45 @@
--- phpMyAdmin SQL Dump
--- version 3.4.5
--- http://www.phpmyadmin.net
+-- MySQL dump 10.13  Distrib 5.5.29, for Linux (x86_64)
 --
--- Host: localhost
--- Generation Time: Oct 14, 2011 at 10:20 AM
--- Server version: 5.5.14
--- PHP Version: 5.3.8
-
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
+-- Host: localhost    Database: Importaciones
+-- ------------------------------------------------------
+-- Server version	5.5.29-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
-
---
--- Database: `Importaciones`
---
-
--- --------------------------------------------------------
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `AuthAssignment`
 --
 
-CREATE TABLE IF NOT EXISTS `AuthAssignment` (
+DROP TABLE IF EXISTS `AuthAssignment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `AuthAssignment` (
   `itemname` varchar(64) NOT NULL,
   `userid` varchar(64) NOT NULL,
   `bizrule` text,
   `data` text,
-  PRIMARY KEY (`itemname`,`userid`)
+  PRIMARY KEY (`itemname`,`userid`),
+  CONSTRAINT `AuthAssignment_ibfk_1` FOREIGN KEY (`itemname`) REFERENCES `AuthItem` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `AuthItem`
 --
 
-CREATE TABLE IF NOT EXISTS `AuthItem` (
+DROP TABLE IF EXISTS `AuthItem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `AuthItem` (
   `name` varchar(64) NOT NULL,
   `type` int(11) NOT NULL,
   `description` text,
@@ -48,27 +47,33 @@ CREATE TABLE IF NOT EXISTS `AuthItem` (
   `data` text,
   PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `AuthItemChild`
 --
 
-CREATE TABLE IF NOT EXISTS `AuthItemChild` (
+DROP TABLE IF EXISTS `AuthItemChild`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `AuthItemChild` (
   `parent` varchar(64) NOT NULL,
   `child` varchar(64) NOT NULL,
   PRIMARY KEY (`parent`,`child`),
-  KEY `child` (`child`)
+  KEY `child` (`child`),
+  CONSTRAINT `AuthItemChild_ibfk_1` FOREIGN KEY (`parent`) REFERENCES `AuthItem` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `AuthItemChild_ibfk_2` FOREIGN KEY (`child`) REFERENCES `AuthItem` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `Item`
 --
 
-CREATE TABLE IF NOT EXISTS `Item` (
+DROP TABLE IF EXISTS `Item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Item` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `Code` varchar(20) NOT NULL DEFAULT '',
   `Name` varchar(100) NOT NULL DEFAULT '',
@@ -79,33 +84,42 @@ CREATE TABLE IF NOT EXISTS `Item` (
   `Line` varchar(45) NOT NULL DEFAULT '',
   `Country` varchar(45) NOT NULL DEFAULT '',
   `ArtType` varchar(45) NOT NULL DEFAULT '',
+  `Incoming` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `Price` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `Currency` varchar(5) NOT NULL DEFAULT 'USD',
   PRIMARY KEY (`id`),
   UNIQUE KEY `Code` (`Code`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=42038 ;
-
--- --------------------------------------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=49702 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `Request`
 --
 
-CREATE TABLE IF NOT EXISTS `Request` (
+DROP TABLE IF EXISTS `Request`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Request` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `Date` date NOT NULL,
-  `PeriodStart` date NOT NULL,
-  `PeriodEnd` date NOT NULL,
-  `SubPeriod` date NOT NULL,
+  `Description` varchar(32) NOT NULL,
+  `P1Start` date NOT NULL,
+  `P1End` date NOT NULL,
+  `P2Start` date NOT NULL,
+  `P2End` date NOT NULL,
   `Enabled` char(1) NOT NULL DEFAULT 'A',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=38 ;
-
--- --------------------------------------------------------
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `RequestDetail`
 --
 
-CREATE TABLE IF NOT EXISTS `RequestDetail` (
+DROP TABLE IF EXISTS `RequestDetail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `RequestDetail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `request_id` bigint(20) NOT NULL,
   `item_id` int(11) NOT NULL,
@@ -113,16 +127,19 @@ CREATE TABLE IF NOT EXISTS `RequestDetail` (
   `ShipTime` decimal(10,2) NOT NULL,
   `ManualQty` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `item_id` (`item_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=16 ;
-
--- --------------------------------------------------------
+  KEY `item_id` (`item_id`),
+  CONSTRAINT `RequestDetail_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `SalesByDay`
 --
 
-CREATE TABLE IF NOT EXISTS `SalesByDay` (
+DROP TABLE IF EXISTS `SalesByDay`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `SalesByDay` (
   `item_id` int(11) NOT NULL,
   `OperDate` date NOT NULL,
   `Unit` varchar(10) NOT NULL,
@@ -130,14 +147,16 @@ CREATE TABLE IF NOT EXISTS `SalesByDay` (
   KEY `item_id` (`item_id`),
   KEY `OperDate` (`OperDate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `Transaction`
 --
 
-CREATE TABLE IF NOT EXISTS `Transaction` (
+DROP TABLE IF EXISTS `Transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Transaction` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `Oper` tinyint(4) NOT NULL,
   `item_id` int(11) NOT NULL,
@@ -155,16 +174,19 @@ CREATE TABLE IF NOT EXISTS `Transaction` (
   KEY `Oper` (`Oper`),
   KEY `Item_Fk` (`item_id`),
   KEY `Enable` (`Enable`),
-  KEY `OperDate` (`OperDate`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=352539 ;
-
--- --------------------------------------------------------
+  KEY `OperDate` (`OperDate`),
+  CONSTRAINT `Transaction_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1094027 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `Users`
 --
 
-CREATE TABLE IF NOT EXISTS `Users` (
+DROP TABLE IF EXISTS `Users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `Users` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(32) NOT NULL,
   `password` varchar(32) NOT NULL,
@@ -173,37 +195,16 @@ CREATE TABLE IF NOT EXISTS `Users` (
   `state` char(1) NOT NULL DEFAULT 'A',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `AuthAssignment`
---
-ALTER TABLE `AuthAssignment`
-  ADD CONSTRAINT `AuthAssignment_ibfk_1` FOREIGN KEY (`itemname`) REFERENCES `AuthItem` (`name`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `AuthItemChild`
---
-ALTER TABLE `AuthItemChild`
-  ADD CONSTRAINT `AuthItemChild_ibfk_1` FOREIGN KEY (`parent`) REFERENCES `AuthItem` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `AuthItemChild_ibfk_2` FOREIGN KEY (`child`) REFERENCES `AuthItem` (`name`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `RequestDetail`
---
-ALTER TABLE `RequestDetail`
-  ADD CONSTRAINT `RequestDetail_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `Transaction`
---
-ALTER TABLE `Transaction`
-  ADD CONSTRAINT `Transaction_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`);
-
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2013-02-02 16:05:31
