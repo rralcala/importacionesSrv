@@ -111,7 +111,6 @@ class Item extends CActiveRecord
 	    $criteria->select="SUM(Qty) AS Qty";
 	    $criteria->condition="(Oper <> '1' OR OperDate = '0000-00-00' OR (Oper = 1 AND AffectStock = 1)) AND item_id = '".$this->id."'";
 		$stock = Transaction::model()->query($criteria); // Este muchacho viene cargado !
-		//error_log("STK:".$stock->Qty);
 		return $stock->Qty;
     }
     public static function getBranches()

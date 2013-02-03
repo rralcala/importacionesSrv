@@ -31,7 +31,7 @@ class RequestDetailController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update', 'delete', 'list', 'jsonupdate', 'jsoncreate', 'jsondelete'),
+				'actions'=>array('getDetail','create','update', 'delete', 'list', 'jsonupdate', 'jsoncreate', 'jsondelete'),
 				'users'=>array('@'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
@@ -175,17 +175,54 @@ class RequestDetailController extends Controller
 	}
 
 	/**
+	 * Return de Details about an Order
+	 **/
+	public function actionGetDetail($id) 
+	{
+		$return = array(); 
+		if($id != '')
+		{	
+			$request = Request::model()->findByPk($id);
+			$models = OrderDetail::model()->findAll('request_id=:request_id', array(':request_id'=>$id));
+	        foreach($models as $item)
+	        {
+	        	
+	        	$temp['StockTime'] = $item->StockTime;
+	        	$temp['ShipTime'] = $item->ShipTime;
+	        	$temp['ManualQty']= $item->ManualQty;
+	        	$Items [] = Item::model()->findByPk($item->item_id);
+	        	$params [] = $temp;
+	        	
+	        }
+	        $reqDet = RequestDetail::getItemDetails($Items, $request->P1Start, $request->P1End, $request->P2Start, $request->P2End, $params);
+	        $return['success'] = true;
+	        // Agregar aca los mismos criterios de busqueda que se apliquen a findAll
+	        $return['totalCount'] = count($reqDet);//$models["totalCount"]; //Item::model()->count();//$criteria
+	        $return['orderDetails'] = $reqDet;
+		}
+        else
+        {
+        	$return['success'] = false;
+        	$return['totalCount'] = 0;//$models["totalCount"]; //Item::model()->count();//$criteria
+        	$return['orderDetails'] = Array();
+        }
+        
+
+        echo CJSON::encode($return);
+
+	}
+
+
+	/**
 	 * List all RequestDetails for the given Request.
 	 **/
 	public function actionList($start, $limit, $page, $p1start, $p2start, $p1end, $p2end, $filter='') {
 		//pagination parameters
-		//error_log($start.'|'. $limit.'|'. $page.'|'. $p1start.'|'. $p2start.'|'. $p1end.'|'. $p2end.'|'. $filter);
 		        // Falta pulir !
 		/*        $page = isset($_GET['page']) ? $_GET['page'] : 1;
 		$start = isset($_GET['start']) ? $_GET['start'] : 0;
 		$limit = isset($_GET['limit']) ? $_GET['limit'] : 200;
 		$filter = isset($_GET['filter']) ? $_GET['filter'] : '';*/
-		//error_log("LIMITFFFF:".$limit);
         $filters = Filter::process_filter($filter); //para item.
         
         $x = 3;

@@ -118,7 +118,6 @@ class RequestDetail extends CFormModel
 
     public static function findAll($fromDate, $toDate, $periodFrom, $periodTo, $start, $limit, $page, $filters=array())
     {
-        error_log("findAll( ".$fromDate.", ".$toDate.", ".$periodFrom.")");
         
         //criteria simple.
         $criteria = new CDbCriteria;
@@ -136,14 +135,22 @@ class RequestDetail extends CFormModel
             ),
         ));
        
-        
         $Items = $dataProvider->getData(true);
         $totalCount = $dataProvider->pagination->getItemCount();
         
-        $c = 0;
+        // Calculate Items Statistics
+        $reqDet = RequestDetail::getItemDetails($Items, $fromDate, $toDate, $periodFrom, $periodTo);
+        
+        return array("orderlist" => $reqDet, "totalCount" => $totalCount);
+
+    }
+
+	function getItemDetails(&$Items, $fromDate, $toDate, $periodFrom, $periodTo, $params = Array())
+	{
+		$c = 0;
         $itStat = null;
         
-        foreach ($Items as $item)
+		 foreach ($Items as $item)
         {
             $itStat[$c] = new ItemStatistics;
             $itStat[$c]->item= $item;
@@ -160,9 +167,19 @@ class RequestDetail extends CFormModel
 		    $reqDet[$c]->Line = $itStat[$c]->item->Line;
 		    $reqDet[$c]->Code = $itStat[$c]->item->Code;
 		    $reqDet[$c]->pendingStock = $itStat[$c]->item->Incoming;
-		    $reqDet[$c]->StockTime = 1;
-		    $reqDet[$c]->ShipTime = 1;
-		    $reqDet[$c]->ManualQty = 0;
+		   $reqDet[$c]->StockTime = 1;
+		    if(isset($params[$c]['StockTime']))
+		    	$reqDet[$c]->desiredStockTime = $params[$c]['StockTime'];
+		    else
+		    	$reqDet[$c]->desiredStockTime = 3;
+		    if(isset($params[$c]['ShipTime']))
+		    	$reqDet[$c]->ShipTime = $params[$c]['ShipTime'];
+		    else
+		    	$reqDet[$c]->ShipTime = 1;
+		    if(isset($params[$c]['ManualQty']))
+		    	$reqDet[$c]->ManualQty = $params[$c]['ManualQty'];
+		    else
+		    	$reqDet[$c]->ManualQty = 0;
 		    $reqDet[$c]->estimation1 = $itStat[$c]->mean;
 		    if($itStat[$c]->stdDev == 0) 
 		    	$itStat[$c]->stdDev = 0.0000001;
@@ -187,7 +204,7 @@ class RequestDetail extends CFormModel
 		     
 		    $reqDet[$c]->stockBreaksCount;
 		    $reqDet[$c]->orderTotal; // Media de tendencias.
-		    $reqDet[$c]->desiredStockTime = 3;
+		  //  $reqDet[$c]->desiredStockTime = 3;
 		    $reqDet[$c]->desiredStock = $reqDet[$c]->desiredStockTime * $reqDet[$c]->estimatedSales;
 		    if($reqDet[$c]->desiredStock > ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock))
 		    	$reqDet[$c]->suggestedQty = $reqDet[$c]->desiredStock - ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock);
@@ -195,12 +212,8 @@ class RequestDetail extends CFormModel
 		    	$reqDet[$c]->suggestedQty = 0;
     		$c++;
         }
-        
-        
-        
-        return array("orderlist" => $reqDet, "totalCount" => $totalCount);
-
-    }
+		return $reqDet;
+	}
 
 	/**
 	 * Retrieves a list of models based on the current search/filter conditions.

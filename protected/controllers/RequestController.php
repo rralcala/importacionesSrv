@@ -187,13 +187,12 @@ class RequestController extends Controller
         foreach($filters as $col => $val){
             $criteria->addInCondition($col, $val);
         }
-
 		
 		$dataProvider = new CActiveDataProvider('Request', array(
 			'criteria' => $criteria,
 			'pagination' => array(
-				'pageSize' => $limit,
-				'currentPage' => $page
+			'pageSize' => $limit,
+			'currentPage' => $page
 				
 			),
 		));
