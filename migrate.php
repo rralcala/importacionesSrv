@@ -1,8 +1,8 @@
 <?php
 /* configuration */
-$myOrigin = new mysqli("192.168.37.1", "root", "rootpasswd", "oodev");
-//$myOrigin = new mysqli("192.168.37.1", "root", "Sw4", "oodev");
-$myDestination = new mysqli("192.168.37.1", "root", "rootpasswd", "Importaciones");
+$myOrigin = new mysqli("127.0.0.1", "root", "", "oodev");
+//$myOrigin = new mysqli("127.0.0.1", "root", "Sw4", "oodev");
+$myDestination = new mysqli("127.0.0.1", "root", "", "Importaciones");
 $maxInsert = 1000;
 
 /* check connection */
@@ -51,7 +51,7 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
 			$incomingRow = $incoming[$row[1]];
 		else
 			$incomingRow = 0;
-		$sql[] = '('.$row[0].',"'.$myOrigin->real_escape_string($row[1]).'","'.$myOrigin->real_escape_string($row[2]).'","'.$row[3].'","'.$row[5].'","'.$row[6].'","'.$labels[0].'","'.$labels[2].'","'.$labels[1].'","'.$labels[3].'", "'.$incomingRow.'","2","USD")';
+		$sql[] = '('.$row[0].',"'.$myOrigin->real_escape_string($row[1]).'","'.$myOrigin->real_escape_string($row[2]).'","'.$row[3].'","'.$row[5].'","'.$row[6].'","'.$labels[0].'","'.$labels[2].'","'.$labels[1].'","'.$labels[3].'", "'.$incomingRow.'","2","USD",15)';
 			
 		if($i == $maxInsert)
 		{
@@ -66,6 +66,15 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
         }
 	$myDestination->query('INSERT INTO Item VALUES '.implode(',', $sql));
 	$result->close();
+      $result = $myOrigin->query("SELECT i.internalId, s.ShipDeal FROM Item as i JOIN Supplier as s ON (i.SupCode = s.Code)  WHERE ShipDeal is not null and ItemGroup = 'MERC'");
+      $cc = 0;
+      while($row = $result->fetch_row())
+      {
+              $myDestination->query('UPDATE Item SET ShipDeal = '.$row[1].' WHERE internalId = '.$row[0]);
+              $cc++;
+      }
+      echo $cc . " Updates\n";
+
 }
 else
 	printf("Error: %s\n", $myOrigin->error);
@@ -84,7 +93,7 @@ $operation[] ="SELECT '9' as Oper, TI.internalId, -Dr.Qty*Drow.Qty Qty, Dr.Unit,
 $operation[] ="SELECT '10' as Oper, TI.internalId, -Ir.Qty*Irow.Qty Qty, Ir.Unit, Ir.Cost Price, Inv.TransDate, Inv.InvoiceDate as OperDate, Inv.StockDepo, Currency, CurrencyRate, 1, 1 AS Enabled FROM TransactionRecipe Ir INNER JOIN Invoice Inv ON Ir.OriginNr = Inv.SerNr INNER JOIN InvoiceItemRow Irow ON Irow.masterId = Inv.internalId AND Irow.Recipe = Ir.RecipeCode INNER JOIN Item TI ON TI.Code = Ir.ArtCode WHERE Inv.Invalid = '0' AND Inv.Status = '1' AND TI.Code  <> 'MIGRACION' AND  TI.ItemGroup = 'MERC'";
 $operation[] ="SELECT '11' as Oper, TI.internalId,  -SDr.Qty*SDrow.Qty Qty, SDr.Unit, SDr.Cost Price, SD.TransDate, SD.TransDate as OperDate, SD.StockDepo, Currency, CurrencyRate, 1, 1 AS Enabled FROM TransactionRecipe SDr INNER JOIN StockDepreciation SD ON SDr.OriginNr = SD.SerNr INNER JOIN StockDepreciationRow SDrow ON SDrow.masterId = SD.internalId AND SDrow.Recipe = SDr.RecipeCode INNER JOIN Item TI ON TI.Code = SDr.ArtCode WHERE SD.Invalid = '0' AND SD.Status = '1' AND TI.Code  <> 'MIGRACION' AND  TI.ItemGroup = 'MERC'";
 $operation[] ="SELECT '12' as Oper, TI.internalId,  RCr.Qty*RCrow.Qty Qty,  RCr.Unit, RCr.Cost Price, RC.TransDate, RC.TransDate as OperDate, RC.StockDepo, Currency, CurrencyRate, 1, 1 AS Enabled FROM TransactionRecipe RCr  INNER JOIN ReturnCustomer RC ON RCr.OriginNr = RC.SerNr INNER JOIN ReturnCustomerItemRow RCrow ON RCrow.masterId = RC.internalId AND RCrow.Recipe = RCr.RecipeCode  INNER JOIN Item TI ON TI.Code = RCr.ArtCode WHERE RC.Invalid = '0' AND RC.Status = '1' AND TI.Code  <> 'MIGRACION' AND ActStock = '1' AND  TI.ItemGroup = 'MERC'";
-$operation[] ="SELECT '13' as Oper, TI.internalId, -Dr.Qty Qty,  Dr.Unit, Dr.Cost Price, D.TransDate, D.DeliveryDate as OperDate, D.StockDepo, Currency, CurrencyRate, 1, 1 AS Enabled  FROM Item TI JOIN DeliveryRow Dr ON (TI.Code = Dr.ArtCode) INNER JOIN Delivery D ON Dr.masterId = D.internalId  WHERE D.Invalid = '0' AND (D.Status = '2' )  AND TI.ItemGroup = 'MERC'AND Dr.ArtCode <> 'MIGRACION'"; // OR D.Status = '1' Picking
+$operation[] ="SELECT '13' as Oper, TI.internalId, -Dr.Qty Qty,  Dr.Unit, Dr.Cost Price, D.TransDate, IFNULL(D.DeliveryDate, D.TransDate) as OperDate, D.StockDepo, Currency, CurrencyRate, 1, 1 AS Enabled  FROM Item TI JOIN DeliveryRow Dr ON (TI.Code = Dr.ArtCode) INNER JOIN Delivery D ON Dr.masterId = D.internalId  WHERE D.Invalid = '0' AND (D.Status = '2' )  AND TI.ItemGroup = 'MERC'AND Dr.ArtCode <> 'MIGRACION'"; // OR D.Status = '1' Picking
 $operation[] ="SELECT '14' as Oper, TI.internalId, RCIr.Qty,  RCIr.Unit, RCIr.Price, RC.TransDate, RC.TransDate as OperDate, RC.StockDepo, Currency, CurrencyRate, 1, 1 AS Enabled  FROM Item TI JOIN ReturnCustomerItemRow RCIr ON (TI.Code = RCIr.ArtCode) INNER JOIN ReturnCustomer RC ON RCIr.masterId = RC.internalId  WHERE RC.Invalid = '0' AND RC.Status = '1'  AND TI.ItemGroup = 'MERC' AND TI.Code <> 'MIGRACION' AND ActStock = '1'";
 $i = 1;
 foreach($operation as $oper)

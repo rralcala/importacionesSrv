@@ -175,7 +175,7 @@ class RequestDetail extends CFormModel
 		    if(isset($params[$c]['ShipTime']))
 		    	$reqDet[$c]->ShipTime = $params[$c]['ShipTime'];
 		    else
-		    	$reqDet[$c]->ShipTime = 1;
+		    	$reqDet[$c]->ShipTime = $itStat[$c]->item->ShipDays/30;
 		    if(isset($params[$c]['ManualQty']))
 		    	$reqDet[$c]->ManualQty = $params[$c]['ManualQty'];
 		    else

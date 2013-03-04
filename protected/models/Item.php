@@ -17,6 +17,7 @@
  * @property string $Incoming
  * @property string $Price
  * @property string $Currency
+ * @property string $ShipDays
  * The followings are the available model relations:
  * @property Transaction[] $transactions
  */
@@ -89,7 +90,8 @@ class Item extends CActiveRecord
             'ArtType' => 'Art Type',
             'Incoming' => 'Incoming',
             'Price' => 'Price',
-            'Currency' => 'Currency'
+            'Currency' => 'Currency',
+	    'ShipDays' => 'ShipDays'
         );
     }
     
