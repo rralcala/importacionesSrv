@@ -1,8 +1,8 @@
 <?php
 /* configuration */
-$myOrigin = new mysqli("127.0.0.1", "root", "", "oodev");
+$myOrigin = new mysqli("192.168.1.138", "root", "rootpasswd", "oodev");
 //$myOrigin = new mysqli("127.0.0.1", "root", "Sw4", "oodev");
-$myDestination = new mysqli("127.0.0.1", "root", "", "Importaciones");
+$myDestination = new mysqli("192.168.1.138", "root", "rootpasswd", "Importaciones");
 $maxInsert = 1000;
 
 /* check connection */
@@ -66,6 +66,7 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
         }
 	$myDestination->query('INSERT INTO Item VALUES '.implode(',', $sql));
 	$result->close();
+
       $result = $myOrigin->query("SELECT i.internalId, s.ShipDeal FROM Item as i JOIN Supplier as s ON (i.SupCode = s.Code)  WHERE ShipDeal is not null and ItemGroup = 'MERC'");
       $cc = 0;
       while($row = $result->fetch_row())
@@ -75,6 +76,19 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
       }
       echo $cc . " Updates\n";
 
+      $result = $myOrigin->query("SELECT si.ArtCode, RawPrice, Currency FROM oodev.SupplierItem si JOIN 
+(SELECT ArtCode, MAX(LastPriceChange) as C FROM oodev.SupplierItem 
+ group by ArtCode) a on (a.ArtCode = si.ArtCode) ");
+
+      $cc = 0;
+      while($row = $result->fetch_row())
+      {
+	$myDestination->query("UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'");
+	//echo "UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'";
+	$cc += $myDestination->affected_rows;
+      
+      }
+      echo $cc . " Updates\n";
 }
 else
 	printf("Error: %s\n", $myOrigin->error);
