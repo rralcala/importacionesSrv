@@ -49,6 +49,7 @@ class ItemStatistics extends CFormModel
         
         foreach($filters as $col => $val){
             $criteria->addInCondition($col, $val);
+            $criteria->order = 'Code';
         }
         
         $dataProvider = new CActiveDataProvider('Item', array(
@@ -183,11 +184,11 @@ class ItemStatistics extends CFormModel
         if(sizeof($devsq) > 0)
         	$stdDev = sqrt(array_sum($devsq) / sizeof($devsq));
         else
-        	$stdDev = -1;
+        	$stdDev = 0;
         if(sizeof($dev) > 0)
         	$meanDev = array_sum($dev)  / sizeof($dev);
         else
-        	$meanDev = -1;
+        	$meanDev = 0;
         return array($stdDev, $meanDev);
     }
 

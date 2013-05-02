@@ -16,13 +16,11 @@
  */
 class RequestDetail extends CFormModel
 {
-	
-	private $sales;
-
-    public $id;
-    public $request_id;
-    public $item_id; //Custom period defaults to 3 months;
-    public $itemName;
+  private $sales;
+  public $id;
+  public $request_id;
+  public $item_id; //Custom period defaults to 3 months;
+  public $itemName;
     public $Line;
     public $Code;
     public $StockTime;
@@ -121,9 +119,10 @@ class RequestDetail extends CFormModel
         
         //criteria simple.
         $criteria = new CDbCriteria;
-        
+        $criteria->order = 'Code ASC';
         foreach($filters as $col => $val){
             $criteria->addInCondition($col, $val);
+            
         }
         
         $dataProvider = new CActiveDataProvider('Item', array(
@@ -180,20 +179,54 @@ class RequestDetail extends CFormModel
 		    	$reqDet[$c]->ManualQty = $params[$c]['ManualQty'];
 		    else
 		    	$reqDet[$c]->ManualQty = 0;
-		    $reqDet[$c]->estimation1 = $itStat[$c]->mean;
+		   
 		    if($itStat[$c]->stdDev == 0) 
 		    	$itStat[$c]->stdDev = 0.0000001;
 		    if($itStat[$c]->periodStdDev == 0) 
 		    	$itStat[$c]->periodStdDev = 0.0000001;
 		    if($itStat[$c]->trendStdDev == 0) 
 		    	$itStat[$c]->trendStdDev = 0.0000001;
-		    $sum = (1 / $itStat[$c]->stdDev) + (1/$itStat[$c]->periodStdDev) + (1/$itStat[$c]->trendStdDev);
 		    
-		    $reqDet[$c]->weight1 = (1 / $itStat[$c]->stdDev) / $sum;
-		    $reqDet[$c]->estimation2= $itStat[$c]->periodMean;
-		    $reqDet[$c]->weight2= (1 / $itStat[$c]->periodStdDev) / $sum;
+		    $reqDet[$c]->estimation1 = $itStat[$c]->mean;
+		    $reqDet[$c]->estimation2 = $itStat[$c]->periodMean;
 		    $reqDet[$c]->estimation3 = $itStat[$c]->trendMean;
-		    $reqDet[$c]->weight3 = (1 / $itStat[$c]->trendStdDev) / $sum;
+		    
+		    $sum = 0;
+		    
+		    if($reqDet[$c]->estimation1)
+		    {
+		    	$sum += (1 / $itStat[$c]->stdDev);
+		    	$tc1 = (1 / $itStat[$c]->stdDev);
+		    }else 
+		    	$tc1 = 0;
+		    if($reqDet[$c]->estimation2)
+		    {
+		    	$sum += (1/$itStat[$c]->periodStdDev);
+		    	$tc2 = (1 / $itStat[$c]->periodStdDev);
+		    }else 
+		    	$tc2 = 0;
+		    if($reqDet[$c]->estimation3)
+		    {
+		    	$sum += (1/$itStat[$c]->trendStdDev);
+		    	$tc3 = (1 / $itStat[$c]->trendStdDev);
+		    }else 
+		    	$tc3 = 0;
+		    
+		    if($sum != 0){
+		    $reqDet[$c]->weight1 = $tc1 / $sum;
+		    
+		    $reqDet[$c]->weight2=  $tc2 / $sum;
+		    
+		    $reqDet[$c]->weight3 =  $tc3 / $sum;
+		    }
+		    
+		    else
+		    	
+		    {$reqDet[$c]->weight1 = 0;
+		    
+		    $reqDet[$c]->weight2=  0;
+		    
+		    $reqDet[$c]->weight3 =  1;}
 		    $reqDet[$c]->estimatedSales = ($reqDet[$c]->estimation1 * $reqDet[$c]->weight1) + ($reqDet[$c]->estimation2 * $reqDet[$c]->weight2) + ($reqDet[$c]->estimation3 * $reqDet[$c]->weight3 );
 		    $reqDet[$c]->currentStock = $itStat[$c]->meanWithinSales; // Media de los meses en los que SE vendio.
 		    if( $reqDet[$c]->estimatedSales != 0)

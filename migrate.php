@@ -51,7 +51,7 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
 			$incomingRow = $incoming[$row[1]];
 		else
 			$incomingRow = 0;
-		$sql[] = '('.$row[0].',"'.$myOrigin->real_escape_string($row[1]).'","'.$myOrigin->real_escape_string($row[2]).'","'.$row[3].'","'.$row[5].'","'.$row[6].'","'.$labels[0].'","'.$labels[2].'","'.$labels[1].'","'.$labels[3].'", "'.$incomingRow.'","2","USD",15)';
+		$sql[] = '('.$row[0].',"'.$myOrigin->real_escape_string($row[1]).'","'.$myOrigin->real_escape_string($row[2]).'","'.$row[3].'","'.$row[5].'","'.$row[6].'","'.$labels[0].'","'.$labels[2].'","'.$labels[1].'","'.$labels[3].'", "'.$incomingRow.'","0","USD",15)';
 			
 		if($i == $maxInsert)
 		{

@@ -12,6 +12,7 @@
  * @property string $P2Start
  * @property string $P2End
  * @property string $Enabled
+ * @property string $user_id
  */
 class Request extends CActiveRecord
 {
