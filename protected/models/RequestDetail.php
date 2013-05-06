@@ -124,7 +124,7 @@ class RequestDetail extends CFormModel
             $criteria->addInCondition($col, $val);
             
         }
-        error_log("findAll($fromDate, $toDate, $periodFrom, $periodTo, $start, $limit, $page, $filters=array())");
+        //error_log("findAll($fromDate, $toDate, $periodFrom, $periodTo, $start, $limit, $page, $filters=array())");
         $dataProvider = new CActiveDataProvider('Item', array(
             'criteria' => $criteria, 
             'pagination' => array(
@@ -237,8 +237,16 @@ class RequestDetail extends CFormModel
 		     
 		    $reqDet[$c]->stockBreaksCount;
 		    $reqDet[$c]->orderTotal; // Media de tendencias.
-		  //  $reqDet[$c]->desiredStockTime = 3;
-		    
+			
+    		if(isset($params[$c]['StockTime']))
+    			$reqDet[$c]->desiredStockTime = $params[$c]['StockTime'];
+    		else
+    			$reqDet[$c]->desiredStockTime = 3;
+    		
+    		$reqDet[$c]->desiredStock = $reqDet[$c]->desiredStockTime * $reqDet[$c]->estimatedSales;
+			
+		  if($item->Code == '23177/010')
+		  error_log("S:".$reqDet[$c]->suggestedQty." D:".$reqDet[$c]->desiredStock." C:".$reqDet[$c]->currentStock. " P:".$reqDet[$c]->pendingStock);
 		    if($reqDet[$c]->desiredStock > ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock))
 		    	$reqDet[$c]->suggestedQty = $reqDet[$c]->desiredStock - ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock);
 		    else
@@ -250,12 +258,7 @@ class RequestDetail extends CFormModel
 		    else
 		    	$reqDet[$c]->ManualQty = $reqDet[$c]->suggestedQty;
     		
-    		if(isset($params[$c]['StockTime']))
-    			$reqDet[$c]->desiredStockTime = $params[$c]['StockTime'];
-    		else
-    			$reqDet[$c]->desiredStockTime = 3;
-    		
-    		$reqDet[$c]->desiredStock = $reqDet[$c]->desiredStockTime * $reqDet[$c]->estimatedSales;
+
     		$c++;
         }
 		return $reqDet;
