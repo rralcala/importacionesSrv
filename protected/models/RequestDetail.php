@@ -124,7 +124,7 @@ class RequestDetail extends CFormModel
             $criteria->addInCondition($col, $val);
             
         }
-        
+        error_log("findAll($fromDate, $toDate, $periodFrom, $periodTo, $start, $limit, $page, $filters=array())");
         $dataProvider = new CActiveDataProvider('Item', array(
             'criteria' => $criteria, 
             'pagination' => array(
@@ -167,18 +167,12 @@ class RequestDetail extends CFormModel
 		    $reqDet[$c]->Code = $itStat[$c]->item->Code;
 		    $reqDet[$c]->pendingStock = $itStat[$c]->item->Incoming;
 		   $reqDet[$c]->StockTime = 1;
-		    if(isset($params[$c]['StockTime']))
-		    	$reqDet[$c]->desiredStockTime = $params[$c]['StockTime'];
-		    else
-		    	$reqDet[$c]->desiredStockTime = 3;
+
 		    if(isset($params[$c]['ShipTime']))
 		    	$reqDet[$c]->ShipTime = $params[$c]['ShipTime'];
 		    else
 		    	$reqDet[$c]->ShipTime = $itStat[$c]->item->ShipDays/30;
-		    if(isset($params[$c]['ManualQty']))
-		    	$reqDet[$c]->ManualQty = $params[$c]['ManualQty'];
-		    else
-		    	$reqDet[$c]->ManualQty = 0;
+
 		   
 		    if($itStat[$c]->stdDev == 0) 
 		    	$itStat[$c]->stdDev = 0.0000001;
@@ -212,37 +206,56 @@ class RequestDetail extends CFormModel
 		    }else 
 		    	$tc3 = 0;
 		    
-		    if($sum != 0){
-		    $reqDet[$c]->weight1 = $tc1 / $sum;
+		    if($sum != 0)
+		    {
+		    	$reqDet[$c]->weight1 = $tc1 / $sum;
 		    
-		    $reqDet[$c]->weight2=  $tc2 / $sum;
+		    	$reqDet[$c]->weight2=  $tc2 / $sum;
 		    
-		    $reqDet[$c]->weight3 =  $tc3 / $sum;
+		    	$reqDet[$c]->weight3 =  $tc3 / $sum;
 		    }
-		    
 		    else
-		    	
-		    {$reqDet[$c]->weight1 = 0;
+			{
+		    	$reqDet[$c]->weight1 = 0;
 		    
-		    $reqDet[$c]->weight2=  0;
+		    	$reqDet[$c]->weight2=  0;
 		    
-		    $reqDet[$c]->weight3 =  1;}
+		    	$reqDet[$c]->weight3 =  1;
+		    }
 		    $reqDet[$c]->estimatedSales = ($reqDet[$c]->estimation1 * $reqDet[$c]->weight1) + ($reqDet[$c]->estimation2 * $reqDet[$c]->weight2) + ($reqDet[$c]->estimation3 * $reqDet[$c]->weight3 );
 		    $reqDet[$c]->currentStock = $itStat[$c]->meanWithinSales; // Media de los meses en los que SE vendio.
+		    
 		    if( $reqDet[$c]->estimatedSales != 0)
+		    {
 		    	$reqDet[$c]->StockTime = $reqDet[$c]->currentStock / $reqDet[$c]->estimatedSales; // La estimacion es para el mes siguiente puede variar por temporada
+		    }
 		    else
+		    {
 		    	$reqDet[$c]->StockTime = -1;
+		    }
 		    $reqDet[$c]->price = $itStat[$c]->item->Price;
 		     
 		    $reqDet[$c]->stockBreaksCount;
 		    $reqDet[$c]->orderTotal; // Media de tendencias.
 		  //  $reqDet[$c]->desiredStockTime = 3;
-		    $reqDet[$c]->desiredStock = $reqDet[$c]->desiredStockTime * $reqDet[$c]->estimatedSales;
+		    
 		    if($reqDet[$c]->desiredStock > ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock))
 		    	$reqDet[$c]->suggestedQty = $reqDet[$c]->desiredStock - ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock);
 		    else
 		    	$reqDet[$c]->suggestedQty = 0;
+		    
+		    // If there's no manual quantity set the pict the app's suggestion.
+		    if(isset($params[$c]['ManualQty']))
+		    	$reqDet[$c]->ManualQty = $params[$c]['ManualQty'];
+		    else
+		    	$reqDet[$c]->ManualQty = $reqDet[$c]->suggestedQty;
+    		
+    		if(isset($params[$c]['StockTime']))
+    			$reqDet[$c]->desiredStockTime = $params[$c]['StockTime'];
+    		else
+    			$reqDet[$c]->desiredStockTime = 3;
+    		
+    		$reqDet[$c]->desiredStock = $reqDet[$c]->desiredStockTime * $reqDet[$c]->estimatedSales;
     		$c++;
         }
 		return $reqDet;
