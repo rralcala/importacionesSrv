@@ -1,7 +1,9 @@
 <?php
+require_once 'migrate.config.php';
+
 /* configuration */
-$myOrigin = new mysqli("192.168.1.138", "root", "rootpasswd", "oodev");
-$myDestination = new mysqli("192.168.1.138", "root", "rootpasswd", "Importaciones");
+$myOrigin = new mysqli($confOrigin['server'], $confOrigin['user'], $confOrigin['password'], $confOrigin['database']);
+$myDestination = new mysqli($confDestination['server'], $confDestination['user'], $confDestination['password'], $confDestination['database']);
 $maxInsert = 1000;
 
 /* check connection */

@@ -1,0 +1,13 @@
+<?php
+
+$confOrigin['server'] = '127.0.0.1';
+$confOrigin['user'] = 'root';
+$confOrigin['password'] = 'rootpasswd';
+$confOrigin['database'] = 'oodev';
+
+$confDestination['server'] = '127.0.0.1';
+$confDestination['user'] = 'root';
+$confDestination['password'] = 'rootpasswd';
+$confDestination['database'] = 'Importaciones';
+
+?>
