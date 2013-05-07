@@ -216,6 +216,7 @@ class RequestController extends Controller
 		
 		$model = new Request;
 		$model->attributes = $params;
+		
 		if($model->save())
 		{
 			foreach($request[1] as $detail)
@@ -223,12 +224,14 @@ class RequestController extends Controller
 				$modelDetail = new RequestDetailData;
 				$modelDetail['request_id'] = $model->id;
 				$modelDetail['item_id'] = $detail['item_id'];
-				$modelDetail['StockTime'] = $detail['desiredStockTime'];
-				$modelDetail['ShipTime'] = $detail['ShipTime'];
-				$modelDetail['ManualQty'] = $detail['ManualQty'];
+				$modelDetail['StockTime'] = round($detail['desiredStockTime'],2); //FFUUUUU
+				$modelDetail['ShipTime'] = round($detail['ShipTime'],2);
+				$modelDetail['ManualQty'] = round($detail['ManualQty'],2);
+				
 				if(!$modelDetail->save()){
 					$retVal = false;
 				}
+				error_log(print_r($modelDetail->getErrors(),'true'));
 			}
 		}
 		else

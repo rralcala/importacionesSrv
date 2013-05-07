@@ -43,7 +43,10 @@ class RequestDetail extends CFormModel
     public $desiredStockTime;
     public $desiredStock;
     
-    
+    function __construct() {
+        parent::__construct();
+       
+    }
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return RequestDetail the static model class
@@ -234,7 +237,7 @@ class RequestDetail extends CFormModel
 		    $reqDet[$c]->price = $itStat[$c]->item->Price;
 		     
 		    $reqDet[$c]->stockBreaksCount;
-		    $reqDet[$c]->orderTotal; // Media de tendencias.
+		     // Media de tendencias.
 			
     		if(isset($params[$c]['StockTime']))
     			$reqDet[$c]->desiredStockTime = $params[$c]['StockTime'];
@@ -247,7 +250,7 @@ class RequestDetail extends CFormModel
 		    	$reqDet[$c]->suggestedQty = $reqDet[$c]->desiredStock - ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock);
 		    else
 		    	$reqDet[$c]->suggestedQty = 0;
-		    
+		    $reqDet[$c]->orderTotal = $reqDet[$c]->suggestedQty * $reqDet[$c]->price ;
 		    // If there's no manual quantity set the pict the app's suggestion.
 		    if(isset($params[$c]['ManualQty']))
 		    	$reqDet[$c]->ManualQty = $params[$c]['ManualQty'];
