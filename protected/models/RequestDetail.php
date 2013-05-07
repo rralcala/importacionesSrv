@@ -154,10 +154,8 @@ class RequestDetail extends CFormModel
             $itStat[$c] = new ItemStatistics;
             $itStat[$c]->item= $item;
             ItemStatistics::find($itStat[$c], $fromDate, $toDate, $periodFrom, $periodTo);
-            
-            
+      
         	$reqDet[$c] = new RequestDetail;
-            
 
 		    $reqDet[$c]->id = $c;
 		    $reqDet[$c]->request_id = 0;
@@ -245,9 +243,7 @@ class RequestDetail extends CFormModel
     		
     		$reqDet[$c]->desiredStock = $reqDet[$c]->desiredStockTime * $reqDet[$c]->estimatedSales;
 			
-		  if($item->Code == '23177/010')
-		  error_log("S:".$reqDet[$c]->suggestedQty." D:".$reqDet[$c]->desiredStock." C:".$reqDet[$c]->currentStock. " P:".$reqDet[$c]->pendingStock);
-		    if($reqDet[$c]->desiredStock > ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock))
+		   if($reqDet[$c]->desiredStock > ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock))
 		    	$reqDet[$c]->suggestedQty = $reqDet[$c]->desiredStock - ($reqDet[$c]->currentStock + $reqDet[$c]->pendingStock);
 		    else
 		    	$reqDet[$c]->suggestedQty = 0;
