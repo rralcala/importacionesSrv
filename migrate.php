@@ -1,7 +1,6 @@
 <?php
 /* configuration */
 $myOrigin = new mysqli("192.168.1.138", "root", "rootpasswd", "oodev");
-//$myOrigin = new mysqli("127.0.0.1", "root", "Sw4", "oodev");
 $myDestination = new mysqli("192.168.1.138", "root", "rootpasswd", "Importaciones");
 $maxInsert = 1000;
 
@@ -76,8 +75,8 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
       }
       echo $cc . " Updates\n";
 
-      $result = $myOrigin->query("SELECT si.ArtCode, RawPrice, Currency FROM oodev.SupplierItem si JOIN 
-(SELECT ArtCode, MAX(LastPriceChange) as C FROM oodev.SupplierItem 
+      $result = $myOrigin->query("SELECT si.ArtCode, RawPrice, Currency FROM SupplierItem si JOIN 
+(SELECT ArtCode, MAX(LastPriceChange) as C FROM SupplierItem 
  group by ArtCode) a on (a.ArtCode = si.ArtCode) ");
 
       $cc = 0;
