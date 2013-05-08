@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.31, for Linux (x86_64)
 --
 -- Host: localhost    Database: Importaciones
 -- ------------------------------------------------------
--- Server version	5.5.29-log
+-- Server version	5.5.31-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -74,7 +74,7 @@ DROP TABLE IF EXISTS `Item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Item` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL DEFAULT '0',
   `Code` varchar(20) NOT NULL DEFAULT '',
   `Name` varchar(100) NOT NULL DEFAULT '',
   `Brand` varchar(20) NOT NULL DEFAULT '',
@@ -87,9 +87,10 @@ CREATE TABLE `Item` (
   `Incoming` decimal(10,2) NOT NULL DEFAULT '0.00',
   `Price` decimal(10,2) NOT NULL DEFAULT '0.00',
   `Currency` varchar(5) NOT NULL DEFAULT 'USD',
+  `ShipDays` int(11) NOT NULL DEFAULT '15',
   PRIMARY KEY (`id`),
   UNIQUE KEY `Code` (`Code`)
-) ENGINE=InnoDB AUTO_INCREMENT=49702 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -108,8 +109,9 @@ CREATE TABLE `Request` (
   `P2Start` date NOT NULL,
   `P2End` date NOT NULL,
   `Enabled` char(1) NOT NULL DEFAULT 'A',
+  `user_id` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -129,7 +131,7 @@ CREATE TABLE `RequestDetail` (
   PRIMARY KEY (`id`),
   KEY `item_id` (`item_id`),
   CONSTRAINT `RequestDetail_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -176,7 +178,7 @@ CREATE TABLE `Transaction` (
   KEY `Enable` (`Enable`),
   KEY `OperDate` (`OperDate`),
   CONSTRAINT `Transaction_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `Item` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1094027 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1251755 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -207,4 +209,4 @@ CREATE TABLE `Users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-02 16:05:31
+-- Dump completed on 2013-05-08  6:49:22
