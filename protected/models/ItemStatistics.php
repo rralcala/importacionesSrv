@@ -27,11 +27,7 @@ class ItemStatistics extends CFormModel
 
     public function rules()
     {
-    /* return array(
-        array('username, password', 'required'),
-        array('rememberMe', 'boolean'),
-        array('password', 'authenticate'),
-        );*/
+
     }
     /**
      * Returns de Items Statistics
@@ -119,7 +115,8 @@ class ItemStatistics extends CFormModel
 
     public static function find($itStat, $fromDate, $toDate, $periodFrom, $periodTo)
     {
-    	$itStat->meanWithinSales = $itStat->Stock = $itStat->item->getStock();
+    	$itStat->meanWithinSales = $itStat->Stock = $itStat->item->getStock($toDate);
+
 		list($totalRows, $months, $x, $Qtys, $itStat->mean) = ItemStatistics::getDataAndMean($itStat->item['id'], $fromDate, $toDate);
 		
 		list($pTotalRows, $pMonths, $pX, $pQtys, $itStat->periodMean) = ItemStatistics::getDataAndMean($itStat->item['id'], $periodFrom, $periodTo);
@@ -134,7 +131,7 @@ class ItemStatistics extends CFormModel
         	        	
         	list($itStat->periodStdDev, $itStat->periodMeanDev) = ItemStatistics::getDeviations($itStat->periodMean, $pQtys);         
             list($itStat->stdDev, $itStat->meanDev) = ItemStatistics::getDeviations($itStat->mean, $Qtys);
-//	    $itStat->mean += $itStat->stdDev;
+
             $itStat->periodMean +=  $itStat->periodMeanDev;
             $lr = ItemStatistics::linear_regression($x, $Qtys);
             $itStat->trend = $lr['b'] + $lr['m'] * $months;
@@ -146,12 +143,6 @@ class ItemStatistics extends CFormModel
         }
         return $itStat;
     }
-    /*public function authenticate($attribute,$params)
-    {
-        $this->_identity=new UserIdentity($this->username,$this->password);
-        if(!$this->_identity->authenticate())
-        $this->addError('password','Incorrect username or password.');
-    }*/
     
     public static function getLinearDeviation($line, $Qtys)
     {

@@ -107,12 +107,19 @@ class Item extends CActiveRecord
         }
         return $retVal;
     }
-    public function getStock()
+    public function getStock($upToDate = '') 
     {
     	$criteria=new CDbCriteria;
 	    $criteria->select="SUM(Qty) AS Qty";
-	    $criteria->condition="(Oper <> '1' OR OperDate = '0000-00-00' OR (Oper = 1 AND AffectStock = 1)) AND item_id = '".$this->id."'";
-		$stock = Transaction::model()->query($criteria); // Este muchacho viene cargado !
+		if($upToDate != '')
+		{
+			$criteria->condition="(Oper <> '1' OR OperDate = '0000-00-00' OR (Oper = 1 AND AffectStock = 1)) AND OperDate <= '".$upToDate."' AND item_id = '".$this->id."'";
+		}
+		else
+		{
+	    	$criteria->condition="(Oper <> '1' OR OperDate = '0000-00-00' OR (Oper = 1 AND AffectStock = 1)) AND item_id = '".$this->id."'";
+		}
+		$stock = Transaction::model()->query($criteria); 
 		return $stock->Qty;
     }
     public static function getBranches()
