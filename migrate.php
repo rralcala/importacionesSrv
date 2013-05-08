@@ -17,6 +17,7 @@ $myDestination->query("DELETE FROM Item");
 
 $i=0;
 
+//This will fetch the Incoming Items
 $result = $myOrigin->query("SELECT  i.Code as Code , SUM(Qty - IFNULL(ReceivedQty,0)) as Pending
 FROM PurchaseOrder AS po
 JOIN PurchaseOrderItemRow AS p ON ( po.internalId = p.masterId )
@@ -28,6 +29,23 @@ GROUP BY i.Code");
 while ($row = $result->fetch_row()) 
 {
     $incoming[$row[0]] = $row[1];
+}
+
+//This will fetch ETAs
+$result = $myOrigin->query("SELECT i.internalId, s.ShipDeal FROM Item as i JOIN Supplier as s ON (i.SupCode = s.Code)  WHERE ShipDeal is not null and ItemGroup = 'MERC'");
+
+while($row = $result->fetch_row())
+{
+	$shipDays[$row[0]] = $row[1];
+}
+//This will Fetch the Prices.
+$result = $myOrigin->query("SELECT si.ArtCode, RawPrice, Currency FROM SupplierItem si JOIN (SELECT ArtCode, MAX(LastPriceChange) as C FROM SupplierItem group by ArtCode) a on (a.ArtCode = si.ArtCode) ");
+
+
+while($row = $result->fetch_row())
+{
+	$prices[$row[0]][0] = $row[1];
+	$prices[$row[0]][1] = $row[2];
 }
 
 if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Unit2, Unit FROM Item WHERE ItemGroup = 'MERC' ORDER BY internalId ")) 
@@ -55,7 +73,23 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
 			$incomingRow = $incoming[$row[1]];
 		else
 			$incomingRow = 0;
-		$sql[] = '('.$row[0].',"'.$myOrigin->real_escape_string($row[1]).'","'.$myOrigin->real_escape_string($row[2]).'","'.$row[3].'","'.$row[5].'","'.$row[6].'","'.$labels[0].'","'.$labels[2].'","'.$labels[1].'","'.$labels[3].'", "'.$incomingRow.'","0","USD",15)';
+		
+		if(isset($shipDays[$row[0]]))
+			$shipDaysRow = $shipDays[$row[0]];
+		else
+			$shipDaysRow = 15;
+		
+		if(isset($prices[$row[1]]))
+		{
+			$priceRow = $prices[$row[1]][0];
+			$currencyRow = $prices[$row[1]][1];
+		}
+		else
+		{
+			$priceRow = 0;
+			$currencyRow = 'USD';
+		}
+		$sql[] = '('.$row[0].',"'.$myOrigin->real_escape_string($row[1]).'","'.$myOrigin->real_escape_string($row[2]).'","'.$row[3].'","'.$row[5].'","'.$row[6].'","'.$labels[0].'","'.$labels[2].'","'.$labels[1].'","'.$labels[3].'", "'.$incomingRow.'","'.$priceRow.'","'.$currencyRow.'", "'.$shipDaysRow.'")';
 			
 		if($i == $maxInsert)
 		{
@@ -68,31 +102,14 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
 		}
 		$i++;
 	}
+	unset($shipDays);
+	unset($shipDays);
 	$myDestination->query('INSERT INTO Item VALUES '.implode(',', $sql));
 	$result->close();
 
-	//This will fetch ETAs
-	$result = $myOrigin->query("SELECT i.internalId, s.ShipDeal FROM Item as i JOIN Supplier as s ON (i.SupCode = s.Code)  WHERE ShipDeal is not null and ItemGroup = 'MERC'");
-	$updateCount = 0;
-	while($row = $result->fetch_row())
-	{
-              $myDestination->query('UPDATE Item SET ShipDays = '.$row[1].' WHERE id = '.$row[0]);
-			
-              $updateCount += $myDestination->affected_rows;
-	}
-	echo $updateCount . " Updates\n";
-	
-	//This will Fetch the Prices.
-	$result = $myOrigin->query("SELECT si.ArtCode, RawPrice, Currency FROM SupplierItem si JOIN (SELECT ArtCode, MAX(LastPriceChange) as C FROM SupplierItem group by ArtCode) a on (a.ArtCode = si.ArtCode) ");
 
-	$updateCount = 0;
- 	while($row = $result->fetch_row())
-	{
-		$myDestination->query("UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'");
-		//echo "UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'";
-		$updateCount += $myDestination->affected_rows;
-	}
-	echo $updateCount . " Updates\n";
+	echo "Done\n";
+	
 }
 else
 	printf("Error: %s\n", $myOrigin->error);
