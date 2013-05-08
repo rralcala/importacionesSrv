@@ -25,13 +25,16 @@ WHERE i.ItemGroup = 'MERC'
 AND (Qty <> ReceivedQty OR ReceivedQty IS NULL) AND FullReceived = 0
 GROUP BY i.Code");
 
-while ($row = $result->fetch_row()) {
+while ($row = $result->fetch_row()) 
+{
     $incoming[$row[0]] = $row[1];
 }
 
-if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Unit2, Unit FROM Item WHERE ItemGroup = 'MERC' ORDER BY internalId ")) {
+if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Unit2, Unit FROM Item WHERE ItemGroup = 'MERC' ORDER BY internalId ")) 
+{
 	printf("Items Obtained. %d\n", $result->num_rows);
-	while ($row = $result->fetch_row()) {
+	while ($row = $result->fetch_row()) 
+	{
 
 		$labels = explode(',',$row[4]);
 		if(!isset($labels[3]))
@@ -64,32 +67,32 @@ if ($result = $myOrigin->query("SELECT internalId, Code, Name, Brand, Labels, Un
 			
 		}
 		$i++;
-        }
+	}
 	$myDestination->query('INSERT INTO Item VALUES '.implode(',', $sql));
 	$result->close();
 
-      $result = $myOrigin->query("SELECT i.internalId, s.ShipDeal FROM Item as i JOIN Supplier as s ON (i.SupCode = s.Code)  WHERE ShipDeal is not null and ItemGroup = 'MERC'");
-      $cc = 0;
-      while($row = $result->fetch_row())
-      {
-              $myDestination->query('UPDATE Item SET ShipDeal = '.$row[1].' WHERE internalId = '.$row[0]);
-              $cc++;
-      }
-      echo $cc . " Updates\n";
+	//This will fetch ETAs
+	$result = $myOrigin->query("SELECT i.internalId, s.ShipDeal FROM Item as i JOIN Supplier as s ON (i.SupCode = s.Code)  WHERE ShipDeal is not null and ItemGroup = 'MERC'");
+	$updateCount = 0;
+	while($row = $result->fetch_row())
+	{
+              $myDestination->query('UPDATE Item SET ShipDays = '.$row[1].' WHERE id = '.$row[0]);
+			
+              $updateCount += $myDestination->affected_rows;
+	}
+	echo $updateCount . " Updates\n";
+	
+	//This will Fetch the Prices.
+	$result = $myOrigin->query("SELECT si.ArtCode, RawPrice, Currency FROM SupplierItem si JOIN (SELECT ArtCode, MAX(LastPriceChange) as C FROM SupplierItem group by ArtCode) a on (a.ArtCode = si.ArtCode) ");
 
-      $result = $myOrigin->query("SELECT si.ArtCode, RawPrice, Currency FROM SupplierItem si JOIN 
-(SELECT ArtCode, MAX(LastPriceChange) as C FROM SupplierItem 
- group by ArtCode) a on (a.ArtCode = si.ArtCode) ");
-
-      $cc = 0;
-      while($row = $result->fetch_row())
-      {
-	$myDestination->query("UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'");
-	//echo "UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'";
-	$cc += $myDestination->affected_rows;
-      
-      }
-      echo $cc . " Updates\n";
+	$updateCount = 0;
+ 	while($row = $result->fetch_row())
+	{
+		$myDestination->query("UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'");
+		//echo "UPDATE Item SET Price = '".$row[1]."', Currency = '".$row[2]."' WHERE Code = '".$row[0]."'";
+		$updateCount += $myDestination->affected_rows;
+	}
+	echo $updateCount . " Updates\n";
 }
 else
 	printf("Error: %s\n", $myOrigin->error);
