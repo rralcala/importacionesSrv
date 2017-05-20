@@ -147,7 +147,6 @@ printf('SalesByDay='.$myDestination->affected_rows."\n");
 $myDestination->query("INSERT INTO SalesByDay select `Transaction`.`item_id` AS `item_id`,`Transaction`.`OperDate` AS `OperDate`,`Transaction`.`Unit` AS `Unit`,sum(`Transaction`.`Qty`) AS `Qty` from `Transaction` where ((`Transaction`.`Enable` = '1') and (`Transaction`.`Oper` = '14')) group by `Transaction`.`item_id`,`Transaction`.`OperDate`,`Transaction`.`Unit`");
 printf('ReturnsSalesByDay='.$myDestination->affected_rows."\n");
 
-printf("Bye\n");
 $myOrigin->close();
 $myDestination->close();
 
